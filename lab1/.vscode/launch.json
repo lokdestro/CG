@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "/home/dima/KG/lab1",
+            "args": [],
+            "env": {},
+            "buildFlags": "",
+            "dlvFlags": ["--check-go-version=false"]
+        }
+    ]
+}
