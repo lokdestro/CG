@@ -212,12 +212,19 @@ func main() {
     // Создание ползунков для CMYK
     cSlider := widget.NewSlider(0, 1)
     cSlider.SetValue(c)
+    cSlider.Step = 0.01
+
     mSlider := widget.NewSlider(0, 1)
     mSlider.SetValue(m)
+    mSlider.Step = 0.01
+
     ySlider := widget.NewSlider(0, 1)
     ySlider.SetValue(yC)
+    ySlider.Step = 0.01
+
     kSlider := widget.NewSlider(0, 1)
     kSlider.SetValue(k)
+    kSlider.Step = 0.01
 
     // Создание виджетов ввода для HSV
             hEntry := widget.NewEntry()
@@ -232,8 +239,11 @@ func main() {
             hSlider.SetValue(h)
             sSlider := widget.NewSlider(0, 1)
             sSlider.SetValue(s)
+            sSlider.Step = 0.01
+
             vSlider := widget.NewSlider(0, 1)
             vSlider.SetValue(v)
+            vSlider.Step = 0.01
 
 
     // Прямоугольник для отображения цвета
@@ -246,8 +256,12 @@ func main() {
         colorRect.Refresh()
     }
 
+    var updating bool
+
     // Функция обновления всех моделей
     updateModels := func(changedModel string) {
+        updating = true
+        defer func() { updating = false }()
         if changedModel == "RGB" {
             // Обновить CMYK
             c, m, yC, k = RGBToCMYK(float64(r), float64(g), float64(b))
@@ -316,16 +330,25 @@ func main() {
 
     // Обработка изменений в ползунках RGB
     rSlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         r = uint8(val)
         rEntry.SetText(strconv.Itoa(int(r)))
         updateModels("RGB")
     }
     gSlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         g = uint8(val)
         gEntry.SetText(strconv.Itoa(int(g)))
         updateModels("RGB")
     }
     bSlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         b = uint8(val)
         bEntry.SetText(strconv.Itoa(int(b)))
         updateModels("RGB")
@@ -333,6 +356,9 @@ func main() {
 
     // Обработка изменений в полях ввода RGB
     rEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
         val, err := strconv.Atoi(text)
         if err == nil && val >= 0 && val <= 255 {
             r = uint8(val)
@@ -341,6 +367,9 @@ func main() {
         }
     }
     gEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
         val, err := strconv.Atoi(text)
         if err == nil && val >= 0 && val <= 255 {
             g = uint8(val)
@@ -349,6 +378,9 @@ func main() {
         }
     }
     bEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
         val, err := strconv.Atoi(text)
         if err == nil && val >= 0 && val <= 255 {
             b = uint8(val)
@@ -359,21 +391,33 @@ func main() {
 
     // Обработка изменений в ползунках CMYK
     cSlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         c = val
         cEntry.SetText(fmt.Sprintf("%.2f", c))
         updateModels("CMYK")
     }
     mSlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         m = val
         mEntry.SetText(fmt.Sprintf("%.2f", m))
         updateModels("CMYK")
     }
     ySlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         yC = val
         yEntry.SetText(fmt.Sprintf("%.2f", yC))
         updateModels("CMYK")
     }
     kSlider.OnChanged = func(val float64) {
+        if updating {
+            return
+        }
         k = val
         kEntry.SetText(fmt.Sprintf("%.2f", k))
         updateModels("CMYK")
@@ -381,6 +425,9 @@ func main() {
 
     // Обработка изменений в полях ввода CMYK
     cEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
 
         val, err := strconv.ParseFloat(text, 64)
         if err == nil && val >= 0 && val <= 1 {
@@ -390,6 +437,9 @@ func main() {
         }
     }
     mEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
         val, err := strconv.ParseFloat(text, 64)
         if err == nil && val >= 0 && val <= 1 {
             m = val
@@ -398,6 +448,9 @@ func main() {
         }
     }
     yEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
         val, err := strconv.ParseFloat(text, 64)
         if err == nil && val >= 0 && val <= 1 {
             yC = val
@@ -406,6 +459,9 @@ func main() {
         }
     }
     kEntry.OnChanged = func(text string) {
+        if updating {
+            return
+        }
         val, err := strconv.ParseFloat(text, 64)
         if err == nil && val >= 0 && val <= 1 {
             k = val
@@ -416,16 +472,25 @@ func main() {
 
     // Обработка изменений в ползунках HSV
             hSlider.OnChanged = func(val float64) {
+                if updating {
+                    return
+                }
                 h = val
                 hEntry.SetText(strconv.FormatFloat(val, 'f', 1, 64))
                 updateModels("HSV")
             }
             sSlider.OnChanged = func(val float64) {
+                if updating {
+                    return
+                }
                 s = val
                 sEntry.SetText(strconv.FormatFloat(val, 'f', 1, 64))
                 updateModels("HSV")
             }
             vSlider.OnChanged = func(val float64) {
+                if updating {
+                    return
+                }
                 v = val
                 vEntry.SetText(strconv.FormatFloat(val, 'f', 1, 64))
                 updateModels("HSV")
@@ -433,6 +498,9 @@ func main() {
 
             // Обработка изменений в полях ввода HSV
             hEntry.OnChanged = func(text string) {
+                if updating {
+                    return
+                }
                 val, err := strconv.ParseFloat(text, 64)
                 if err == nil && val >= 0.0 && val <= 360.0 {
                     h = val
@@ -441,6 +509,9 @@ func main() {
                 }
             }
             sEntry.OnChanged = func(text string) {
+                if updating {
+                    return
+                }
                 val, err := strconv.ParseFloat(text, 64)
                 if err == nil && val >= 0.0 && val <= 1.0 {
                     s = val
@@ -449,6 +520,9 @@ func main() {
                 }
             }
             vEntry.OnChanged = func(text string) {
+                if updating {
+                    return
+                }
                 val, err := strconv.ParseFloat(text, 64)
                 if err == nil && val >= 0.0 && val <= 1.0 {
                     v = val
@@ -657,99 +731,4 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8) {
     g = uint8(gFloat * 255)
     b = uint8(bFloat * 255)
     return
-}
-// RGB to HLS
-func RGBToHLS(r, g, b uint8) (h, l, s float64) {
-    rFloat := float64(r) / 255
-    gFloat := float64(g) / 255
-    bFloat := float64(b) / 255
-
-    max := math.Max(rFloat, math.Max(gFloat, bFloat))
-    min := math.Min(rFloat, math.Min(gFloat, bFloat))
-    l = (max + min) / 2
-
-    if max == min {
-        s = 0
-        h = 0
-    } else {
-        delta := max - min
-        if l < 0.5 {
-            s = delta / (max + min)
-        } else {
-            s = delta / (2.0 - max - min)
-        }
-
-        switch max {
-        case rFloat:
-            h = (gFloat - bFloat) / delta
-            if gFloat < bFloat {
-                h += 6
-            }
-        case gFloat:
-            h = (bFloat - rFloat)/delta + 2
-        case bFloat:
-            h = (rFloat - gFloat)/delta + 4
-        }
-        h *= 60
-    }
-
-    return
-}
-
-// HLS to RGB
-func HLSToRGB(h, l, s float64) (r, g, b uint8) {
-    var rFloat, gFloat, bFloat float64
-
-    if s == 0 {
-        rFloat, gFloat, bFloat = l, l, l
-    } else {
-        var q float64
-        if l < 0.5 {
-            q = l * (1 + s)
-        } else {
-            q = l + s - l*s
-        }
-        p := 2*l - q
-        hk := h / 360
-
-        tR := hk + 1.0/3.0
-        tG := hk
-        tB := hk - 1.0/3.0
-
-        tR = adjustHue(tR)
-        tG = adjustHue(tG)
-        tB = adjustHue(tB)
-
-        rFloat = hueToRGB(p, q, tR)
-        gFloat = hueToRGB(p, q, tG)
-        bFloat = hueToRGB(p, q, tB)
-    }
-
-    r = uint8(rFloat * 255)
-    g = uint8(gFloat * 255)
-    b = uint8(bFloat * 255)
-    return
-}
-
-func adjustHue(t float64) float64 {
-    if t < 0 {
-        t += 1
-    }
-    if t > 1 {
-        t -= 1
-    }
-    return t
-}
-
-func hueToRGB(p, q, t float64) float64 {
-    if t < 1.0/6.0 {
-        return p + (q-p)*6*t
-    }
-    if t < 1.0/2.0 {
-        return q
-    }
-    if t < 2.0/3.0 {
-        return p + (q-p)*(2.0/3.0 - t)*6
-    }
-    return p
 }
