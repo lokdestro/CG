@@ -177,7 +177,7 @@ func main() {
 	// Начальные значения цвета (белый)
 	var r, g, b uint8 = 255, 255, 255
 	c, m, yC, k := RGBToCMYK(float64(r), float64(g), float64(b))
-	h, s, v := RGBToHSV(r, g, b)
+	h, s, v := RGBToHLS(r, g, b)
 
 	// Создание виджетов ввода для RGB
 	rEntry := widget.NewEntry()
@@ -223,7 +223,7 @@ func main() {
 	kSlider.SetValue(k)
 	kSlider.Step = 0.01
 
-	// Создание виджетов ввода для HSV
+	// Создание виджетов ввода для HLS
 	hEntry := widget.NewEntry()
 	hEntry.SetText(fmt.Sprintf("%.2f", h))
 	sEntry := widget.NewEntry()
@@ -231,7 +231,7 @@ func main() {
 	vEntry := widget.NewEntry()
 	vEntry.SetText(fmt.Sprintf("%.2f", v))
 
-	// Создание ползунков для HSV
+	// Создание ползунков для HLS
 	hSlider := widget.NewSlider(0, 360)
 	hSlider.SetValue(h)
 	sSlider := widget.NewSlider(0, 1)
@@ -270,8 +270,8 @@ func main() {
 			ySlider.SetValue(yC)
 			kSlider.SetValue(k)
 
-			// Обновить HSV
-			h, s, v = RGBToHSV(r, g, b)
+			// Обновить HLS
+			h, s, v = RGBToHLS(r, g, b)
 			hEntry.SetText(fmt.Sprintf("%.2f", h))
 			sEntry.SetText(fmt.Sprintf("%.2f", s))
 			vEntry.SetText(fmt.Sprintf("%.2f", v))
@@ -289,8 +289,8 @@ func main() {
 			gSlider.SetValue(float64(g))
 			bSlider.SetValue(float64(b))
 
-			// Обновить HSV
-			h, s, v = RGBToHSV(r, g, b)
+			// Обновить HLS
+			h, s, v = RGBToHLS(r, g, b)
 			hEntry.SetText(fmt.Sprintf("%.2f", h))
 			sEntry.SetText(fmt.Sprintf("%.2f", s))
 			vEntry.SetText(fmt.Sprintf("%.2f", v))
@@ -298,9 +298,9 @@ func main() {
 			sSlider.SetValue(s)
 			vSlider.SetValue(v)
 
-		} else if changedModel == "HSV" {
+		} else if changedModel == "HLS" {
 			// Обновить RGB
-			r, g, b = HSVToRGB(h, s, v)
+			r, g, b = HLSToRGB(h, s, v)
 			rEntry.SetText(strconv.Itoa(int(r)))
 			gEntry.SetText(strconv.Itoa(int(g)))
 			bEntry.SetText(strconv.Itoa(int(b)))
@@ -466,14 +466,14 @@ func main() {
 		}
 	}
 
-	// Обработка изменений в ползунках HSV
+	// Обработка изменений в ползунках HLS
 	hSlider.OnChanged = func(val float64) {
 		if updating {
 			return
 		}
 		h = val
 		hEntry.SetText(strconv.FormatFloat(val, 'f', 1, 64))
-		updateModels("HSV")
+		updateModels("HLS")
 	}
 	sSlider.OnChanged = func(val float64) {
 		if updating {
@@ -481,7 +481,7 @@ func main() {
 		}
 		s = val
 		sEntry.SetText(strconv.FormatFloat(val, 'f', 1, 64))
-		updateModels("HSV")
+		updateModels("HLS")
 	}
 	vSlider.OnChanged = func(val float64) {
 		if updating {
@@ -489,10 +489,10 @@ func main() {
 		}
 		v = val
 		vEntry.SetText(strconv.FormatFloat(val, 'f', 1, 64))
-		updateModels("HSV")
+		updateModels("HLS")
 	}
 
-	// Обработка изменений в полях ввода HSV
+	// Обработка изменений в полях ввода HLS
 	hEntry.OnChanged = func(text string) {
 		if updating {
 			return
@@ -501,7 +501,7 @@ func main() {
 		if err == nil && val >= 0.0 && val <= 360.0 {
 			h = val
 			hSlider.SetValue(h)
-			updateModels("HSV")
+			updateModels("HLS")
 		}
 	}
 	sEntry.OnChanged = func(text string) {
@@ -512,7 +512,7 @@ func main() {
 		if err == nil && val >= 0.0 && val <= 1.0 {
 			s = val
 			sSlider.SetValue(s)
-			updateModels("HSV")
+			updateModels("HLS")
 		}
 	}
 	vEntry.OnChanged = func(text string) {
@@ -523,7 +523,7 @@ func main() {
 		if err == nil && val >= 0.0 && val <= 1.0 {
 			v = val
 			vSlider.SetValue(v)
-			updateModels("HSV")
+			updateModels("HLS")
 		}
 	}
 
@@ -575,9 +575,9 @@ func main() {
 		),
 	)
 
-	// Расположение виджетов для HSV
+	// Расположение виджетов для HLS
 	hsvContent := container.NewVBox(
-		widget.NewLabel("HSV"),
+		widget.NewLabel("HLS"),
 		container.NewGridWithColumns(3,
 			container.NewVBox(
 				widget.NewLabel("H"),
@@ -585,12 +585,12 @@ func main() {
 				hSlider,
 			),
 			container.NewVBox(
-				widget.NewLabel("S"),
+				widget.NewLabel("L"),
 				sEntry,
 				sSlider,
 			),
 			container.NewVBox(
-				widget.NewLabel("V"),
+				widget.NewLabel("S"),
 				vEntry,
 				vSlider,
 			),
@@ -738,4 +738,100 @@ func HSVToRGB(h, s, v float64) (r, g, b uint8) {
 	g = uint8(gFloat * 255)
 	b = uint8(bFloat * 255)
 	return
+}
+
+// RGB to HLS
+func RGBToHLS(r, g, b uint8) (h, l, s float64) {
+    rFloat := float64(r) / 255
+    gFloat := float64(g) / 255
+    bFloat := float64(b) / 255
+
+    max := math.Max(rFloat, math.Max(gFloat, bFloat))
+    min := math.Min(rFloat, math.Min(gFloat, bFloat))
+    l = (max + min) / 2
+
+    if max == min {
+        s = 0
+        h = 0
+    } else {
+        delta := max - min
+        if l < 0.5 {
+            s = delta / (max + min)
+        } else {
+            s = delta / (2.0 - max - min)
+        }
+
+        switch max {
+        case rFloat:
+            h = (gFloat - bFloat) / delta
+            if gFloat < bFloat {
+                h += 6
+            }
+        case gFloat:
+            h = (bFloat - rFloat)/delta + 2
+        case bFloat:
+            h = (rFloat - gFloat)/delta + 4
+        }
+        h *= 60
+    }
+
+    return
+}
+
+// HLS to RGB
+func HLSToRGB(h, l, s float64) (r, g, b uint8) {
+    var rFloat, gFloat, bFloat float64
+
+    if s == 0 {
+        rFloat, gFloat, bFloat = l, l, l
+    } else {
+        var q float64
+        if l < 0.5 {
+            q = l * (1 + s)
+        } else {
+            q = l + s - l*s
+        }
+        p := 2*l - q
+        hk := h / 360
+
+        tR := hk + 1.0/3.0
+        tG := hk
+        tB := hk - 1.0/3.0
+
+        tR = adjustHue(tR)
+        tG = adjustHue(tG)
+        tB = adjustHue(tB)
+
+        rFloat = hueToRGB(p, q, tR)
+        gFloat = hueToRGB(p, q, tG)
+        bFloat = hueToRGB(p, q, tB)
+    }
+
+    r = uint8(rFloat * 255)
+    g = uint8(gFloat * 255)
+    b = uint8(bFloat * 255)
+    return
+}
+
+func adjustHue(t float64) float64 {
+    if t < 0 {
+        t += 1
+    }
+    if t > 1 {
+        t -= 1
+    }
+    return t
+}
+
+func hueToRGB(p, q, t float64) float64 {
+    if t < 1.0/6.0 {
+        return p + (q-p)*6*t
+    }
+    if t < 1.0/2.0 {
+        return q
+    }
+    if t < 2.0/3.0 {
+        return p + (q-p)*(2.0/3.0 - t)*6
+    }
+    return p
 }
