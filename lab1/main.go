@@ -17,155 +17,179 @@ import (
 )
 
 type ColorWheel struct {
-	widget.BaseWidget
-	SelectedColor  color.Color
-	OnColorChanged func(color.Color)
+    widget.BaseWidget
+    SelectedColor  color.Color
+    OnColorChanged func(color.Color)
 
-	diameter float32
-	mu       sync.Mutex
+    diameter float32
+    mu       sync.Mutex
+
+    marker *canvas.Circle
 }
 
 func NewColorWheel(diameter float32) *ColorWheel {
-	cw := &ColorWheel{diameter: diameter}
-	cw.ExtendBaseWidget(cw)
-	return cw
+    cw := &ColorWheel{diameter: diameter}
+    cw.marker = canvas.NewCircle(color.Black)
+    cw.marker.StrokeColor = color.White
+    cw.marker.StrokeWidth = 2
+    cw.marker.Hide() // Скрываем маркер по умолчанию
+    cw.ExtendBaseWidget(cw)
+    return cw
 }
 
 func (cw *ColorWheel) CreateRenderer() fyne.WidgetRenderer {
-	cw.mu.Lock()
-	defer cw.mu.Unlock()
+    cw.mu.Lock()
+    defer cw.mu.Unlock()
 
-	img := canvas.NewRaster(cw.draw)
-	img.SetMinSize(fyne.NewSize(cw.diameter, cw.diameter))
+    img := canvas.NewRaster(cw.draw)
+    img.SetMinSize(fyne.NewSize(cw.diameter, cw.diameter))
 
-	objects := []fyne.CanvasObject{img}
-	return &colorWheelRenderer{cw: cw, img: img, objects: objects}
+    objects := []fyne.CanvasObject{img, cw.marker}
+    return &colorWheelRenderer{cw: cw, img: img, objects: objects}
 }
 
 func (cw *ColorWheel) draw(w, h int) image.Image {
-	img := image.NewRGBA(image.Rect(0, 0, w, h))
+    img := image.NewRGBA(image.Rect(0, 0, w, h))
 
-	cx, cy := float64(w)/2, float64(h)/2
-	radius := math.Min(cx, cy)
+    cx, cy := float64(w)/2, float64(h)/2
+    radius := math.Min(cx, cy)
 
-	for x := 0; x < w; x++ {
-		for y := 0; y < h; y++ {
+    for x := 0; x < w; x++ {
+        for y := 0; y < h; y++ {
 
-			dx := float64(x) - cx
-			dy := float64(y) - cy
-			r := math.Hypot(dx, dy)
-			if r <= radius {
-				theta := math.Atan2(dy, dx)
-				if theta < 0 {
-					theta += 2 * math.Pi
-				}
-				h := theta / (2 * math.Pi)
-				s := r / radius
-				v := 1.0
+            dx := float64(x) - cx
+            dy := float64(y) - cy
+            r := math.Hypot(dx, dy)
+            if r <= radius {
+                theta := math.Atan2(dy, dx)
+                if theta < 0 {
+                    theta += 2 * math.Pi
+                }
+                h := theta / (2 * math.Pi)
+                s := r / radius
+                v := 1.0
 
-				c := hsvToColor(h, s, v)
-				img.Set(x, y, c)
-			} else {
-				img.Set(x, y, color.Transparent)
-			}
-		}
-	}
-	return img
+                c := hsvToColor(h, s, v)
+                img.Set(x, y, c)
+            } else {
+                img.Set(x, y, color.Transparent)
+            }
+        }
+    }
+    return img
 }
 
 func hsvToColor(h, s, v float64) color.Color {
-	i := int(h * 6)
-	f := h*6 - float64(i)
-	p := v * (1 - s)
-	q := v * (1 - f*s)
-	t := v * (1 - (1-f)*s)
+    i := int(h * 6)
+    f := h*6 - float64(i)
+    p := v * (1 - s)
+    q := v * (1 - f*s)
+    t := v * (1 - (1-f)*s)
 
-	var r, g, b float64
-	switch i % 6 {
-	case 0:
-		r, g, b = v, t, p
-	case 1:
-		r, g, b = q, v, p
-	case 2:
-		r, g, b = p, v, t
-	case 3:
-		r, g, b = p, q, v
-	case 4:
-		r, g, b = t, p, v
-	case 5:
-		r, g, b = v, p, q
-	}
+    var r, g, b float64
+    switch i % 6 {
+    case 0:
+        r, g, b = v, t, p
+    case 1:
+        r, g, b = q, v, p
+    case 2:
+        r, g, b = p, v, t
+    case 3:
+        r, g, b = p, q, v
+    case 4:
+        r, g, b = t, p, v
+    case 5:
+        r, g, b = v, p, q
+    }
 
-	return color.NRGBA{
-		R: uint8(r * 255),
-		G: uint8(g * 255),
-		B: uint8(b * 255),
-		A: 255,
-	}
+    return color.NRGBA{
+        R: uint8(r * 255),
+        G: uint8(g * 255),
+        B: uint8(b * 255),
+        A: 255,
+    }
 }
 
 func (cw *ColorWheel) MouseDown(e *desktop.MouseEvent) {
-	cw.updateSelectedColor(e)
+    cw.updateSelectedColor(e)
 }
 
 func (cw *ColorWheel) MouseUp(e *desktop.MouseEvent) {}
 
 func (cw *ColorWheel) MouseMoved(e *desktop.MouseEvent) {
-	cw.updateSelectedColor(e)
+    cw.updateSelectedColor(e)
 }
 
 func (cw *ColorWheel) updateSelectedColor(e *desktop.MouseEvent) {
-	cw.mu.Lock()
-	defer cw.mu.Unlock()
+    cw.mu.Lock()
+    defer cw.mu.Unlock()
 
-	size := cw.Size()
-	cx, cy := size.Width/2, size.Height/2
-	dx := e.Position.X - cx
-	dy := e.Position.Y - cy
-	r := math.Hypot(float64(dx), float64(dy))
-	radius := float64(math.Min(float64(cx), float64(cy)))
+    size := cw.Size()
+    cx, cy := size.Width/2, size.Height/2
+    dx := e.Position.X - cx
+    dy := e.Position.Y - cy
+    r := math.Hypot(float64(dx), float64(dy))
+    radius := float64(math.Min(float64(cx), float64(cy)))
 
-	if r <= radius {
-		theta := math.Atan2(float64(dy), float64(dx))
-		if theta < 0 {
-			theta += 2 * math.Pi
-		}
-		h := theta / (2 * math.Pi)
-		s := r / radius
-		v := 1.0
+    if r <= radius {
+        theta := math.Atan2(float64(dy), float64(dx))
+        if theta < 0 {
+            theta += 2 * math.Pi
+        }
+        h := theta / (2 * math.Pi)
+        s := r / radius
+        v := 1.0
 
-		c := hsvToColor(h, s, v)
-		cw.SelectedColor = c
-		if cw.OnColorChanged != nil {
-			cw.OnColorChanged(c)
-		}
-	}
+        c := hsvToColor(h, s, v)
+        cw.SelectedColor = c
+
+        // Обновляем позицию маркера
+        cw.updateMarkerPosition(e.Position)
+        cw.marker.Show()
+
+        if cw.OnColorChanged != nil {            cw.OnColorChanged(c)
+        }
+    } else {
+        cw.marker.Hide()
+    }
+
+    // Сообщаем, что виджет нужно перерисовать
+    cw.Refresh()
+}
+
+func (cw *ColorWheel) updateMarkerPosition(pos fyne.Position) {
+    // Устанавливаем позицию маркера в точке выбора
+    cw.marker.Resize(fyne.NewSize(10, 10))
+    cw.marker.Move(fyne.NewPos(pos.X-5, pos.Y-5))
 }
 
 type colorWheelRenderer struct {
-	cw      *ColorWheel
-	img     *canvas.Raster
-	objects []fyne.CanvasObject
+    cw      *ColorWheel
+    img     *canvas.Raster
+    objects []fyne.CanvasObject
 }
 
 func (r *colorWheelRenderer) Layout(size fyne.Size) {
-	r.img.Resize(size)
+    r.img.Resize(size)
 }
 
 func (r *colorWheelRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(r.cw.diameter, r.cw.diameter)
+    return fyne.NewSize(r.cw.diameter, r.cw.diameter)
 }
 
 func (r *colorWheelRenderer) Refresh() {
-	r.img.Refresh()
+    r.img.Refresh()
+    if r.cw.marker.Visible() {
+        r.cw.marker.Refresh()
+    }
 }
 
 func (r *colorWheelRenderer) BackgroundColor() color.Color {
-	return color.Transparent
+    return color.Transparent
 }
 
 func (r *colorWheelRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
+    return r.objects
 }
 
 func (r *colorWheelRenderer) Destroy() {}
