@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузить изображение</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="file"],
+        input[type="submit"] {
+            margin-top: 10px;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Загрузите изображение для обработки</h1>
+    <form method="post" enctype="multipart/form-data">
+        <label for="file">Выберите изображение:</label><br>
+        <input type="file" name="file" id="file" required><br><br>
+        <label>Выберите методы обработки:</label><br>
+        <input type="checkbox" name="methods" value="corners"> Обнаружение углов<br>
+        <input type="checkbox" name="methods" value="lines"> Обнаружение линий<br>
+        <input type="checkbox" name="methods" value="edges"> Обнаружение границ<br>
+        <input type="checkbox" name="methods" value="brightness"> обнаружения перепадов яркости<br>
+        <input type="checkbox" name="methods" value="morphology"> Морфологическая обработка<br><br>
+        <input type="submit" value="Загрузить и обработать">
+    </form>
+</body>
+</html>

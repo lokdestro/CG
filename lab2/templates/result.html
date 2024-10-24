@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат обработки</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        h2 {
+            color: #6c757d;
+        }
+        img {
+            display: block;
+            margin: 20px auto;
+            max-width: 100%;
+            height: auto;
+        }
+        a {
+            display: block;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Результат обработки</h1>
+    <h2>Оригинальное изображение:</h2>
+    <img src="{{ url_for('static', filename='uploads/' + original_image.split('/')[-1]) }}" alt="Оригинальное изображение"><br><br>
+    <h2>Обработанное изображение:</h2>
+    <img src="{{ url_for('static', filename='uploads/' + processed_image.split('/')[-1]) }}" alt="Обработанное изображение"><br><br>
+    <a href="{{ url_for('upload_image') }}">Обработать другое изображение</a>
+</body>
+</html>
