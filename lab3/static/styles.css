@@ -1,0 +1,28 @@
+.container {
+    width: 600px;
+    margin: 0 auto;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
+    margin-top: 10px;
+}
+
+input {
+    margin-top: 10px;
+}
+
+#runButton {
+    margin-top: 20px;
+}
+
+#result {
+    margin-top: 20px;
+}
+
+#result img {
+    max-width: 500px;
+    max-height: 500px;
+    border: 1px solid #ccc;
+}

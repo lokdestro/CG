@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Иллюстрация растровых алгоритмов</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <h1>Иллюстрация работы базовых растровых алгоритмов</h1>
+    <div class="container">
+        <div class="algorithm-selection">
+            <label for="algorithm">Алгоритм:</label>
+            <select id="algorithm">
+                <option value="">-- Выберите алгоритм --</option>
+                <option value="step_by_step">Пошаговый алгоритм</option>
+                <option value="dda">Алгоритм ЦДА</option>
+                <option value="bresenham_line">Алгоритм Брезенхема (отрезок)</option>
+                <option value="bresenham_circle">Алгоритм Брезенхема (окружность)</option>
+            </select>
+        </div>
+        <div class="parameters" id="parameters">
+            <!-- Здесь будут параметры выбранного алгоритма -->
+        </div>
+        <button id="runButton">Запустить алгоритм</button>
+        <div id="result">
+            <img id="resultImage" src="" alt="Результат алгоритма">
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
