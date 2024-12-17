@@ -11,6 +11,8 @@ def execute_algorithm(algorithm, params):
         return bresenham_line_algorithm(params)
     elif algorithm == 'bresenham_circle':
         return bresenham_circle_algorithm(params)
+    elif algorithm == 'bresenham_ellipse':
+        return bresenham_ellipse_algorithm(params)
     else:
         return 'Неизвестный алгоритм'
 
@@ -130,7 +132,7 @@ def bresenham_line_algorithm(params):
     if dy <= dx:
         err = dx / 2.0
         while x != x2:
-            draw.point((x, y), fill='green')
+            draw.point((x, y), fill='purple')
             err -= dy
             if err < 0:
                 y += sy
@@ -139,13 +141,13 @@ def bresenham_line_algorithm(params):
     else:
         err = dy / 2.0
         while y != y2:
-            draw.point((x, y), fill='green')
+            draw.point((x, y), fill='purple')
             err -= dx
             if err < 0:
                 x += sx
                 err += dy
             y += sy
-    draw.point((x, y), fill='green')
+    draw.point((x, y), fill='purple')
 
     img_str = get_image_data(img)
     return img_str
@@ -188,3 +190,62 @@ def bresenham_circle_algorithm(params):
 
     img_str = get_image_data(img)
     return img_str
+
+def bresenham_ellipse_algorithm(params):
+    xc = int(params.get('xc', 25))
+    yc = int(params.get('yc', 25))
+    rx = int(params.get('rx', 15))  # Большая полуось
+    ry = int(params.get('ry', 10))  # Малая полуось
+
+    img = create_image()
+    draw = ImageDraw.Draw(img)
+
+    x = 0
+    y = ry
+    rx2 = rx * rx
+    ry2 = ry * ry
+    two_rx2 = 2 * rx2
+    two_ry2 = 2 * ry2
+    px = 0
+    py = two_rx2 * y
+
+    def draw_ellipse(xc, yc, x, y):
+        points = [
+            (xc + x, yc + y),
+            (xc - x, yc + y),
+            (xc + x, yc - y),
+            (xc - x, yc - y)
+        ]
+        for point in points:
+            if 0 <= point[0] < 50 and 0 <= point[1] < 50:
+                draw.point(point, fill='green')
+
+    # Первая часть
+    p = round(ry2 - (rx2 * ry) + (0.25 * rx2))
+    while px < py:
+        draw_ellipse(xc, yc, x, y)
+        x += 1
+        px += two_ry2
+        if p < 0:
+            p += ry2 + px
+        else:
+            y -= 1
+            py -= two_rx2
+            p += ry2 + px - py
+
+    # Вторая часть
+    p = round(ry2 * (x + 0.5) * (x + 0.5) + rx2 * (y - 1) * (y - 1) - rx2 * ry2)
+    while y >= 0:
+        draw_ellipse(xc, yc, x, y)
+        y -= 1
+        py -= two_rx2
+        if p > 0:
+            p += rx2 - py
+        else:
+            x += 1
+            px += two_ry2
+            p += rx2 - py + px
+
+    img_str = get_image_data(img)
+    return img_str
+

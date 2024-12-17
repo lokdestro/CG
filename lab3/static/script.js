@@ -19,6 +19,13 @@ document.getElementById('algorithm').addEventListener('change', function() {
             createParameterInput(parametersDiv, 'yc', 'Y центра:', 'number', '25');
             createParameterInput(parametersDiv, 'radius', 'Радиус:', 'number', '20');
             break;
+        case 'bresenham_ellipse':
+            // Параметры для отрисовки эллипса
+            createParameterInput(parametersDiv, 'xc', 'X центра:', 'number', '25');
+            createParameterInput(parametersDiv, 'yc', 'Y центра:', 'number', '25');
+            createParameterInput(parametersDiv, 'rx', 'Большая полуось (Rx):', 'number', '15');
+            createParameterInput(parametersDiv, 'ry', 'Малая полуось (Ry):', 'number', '10');
+            break;
         default:
             // Если алгоритм не выбран или опция сбросилась
             parametersDiv.innerHTML = '';
